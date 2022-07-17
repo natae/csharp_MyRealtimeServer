@@ -9,7 +9,7 @@
 - Re-using session object
 
 ## How to use
-- ![SampleServer](../SampleServer)
+- [SampleServer](../SampleServer)
 
 ## TODO
 - Handling packet size larger than buffer size
