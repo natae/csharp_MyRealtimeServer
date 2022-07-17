@@ -8,7 +8,8 @@ namespace MyServerBase
 {
     internal class Util
     {
-        public static long Now { 
+        public static long Now 
+        { 
             get
             {
                 return (long) DateTime.Now.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds;
