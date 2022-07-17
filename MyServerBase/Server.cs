@@ -214,6 +214,8 @@ namespace MyServerBase
                         Logger.Log($"OnReceiveFunc is null");
                     }
 
+                    session.ClientSocket.BeginReceive(session.Buffer, 0, _config.BufferSize, 0, new AsyncCallback(ReadCallback), session);
+
                     // TODO: TotalSize > BufferSize 경우 처리 필요
                 }
                 else

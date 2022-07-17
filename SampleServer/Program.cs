@@ -8,8 +8,8 @@ var config = new Config
     Port = 3000,
     Backlog = 100,
     BufferSize = 2048,
-    HeartBeatInterval = 5,
-    HeartBeatTimeout = 10,
+    HeartBeatInterval = 30,
+    HeartBeatTimeout = 120,
 };
 
 // Echo server
