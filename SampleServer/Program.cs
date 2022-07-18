@@ -10,6 +10,7 @@ var config = new Config
     BufferSize = 2048,
     HeartBeatInterval = 30,
     HeartBeatTimeout = 120,
+    LogLevel = 1,
 };
 
 // Echo server

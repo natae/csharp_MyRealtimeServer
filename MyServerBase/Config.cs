@@ -25,5 +25,7 @@ namespace MyServerBase
         /// seconds
         /// </summary>
         public int HeartBeatInterval = 5;
+
+        public int LogLevel = 1;
     }
 }

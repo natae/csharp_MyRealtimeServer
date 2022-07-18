@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net.Sockets;
+using Microsoft.Extensions.Logging;
 
 namespace MyServerBase
 {
@@ -32,14 +33,16 @@ namespace MyServerBase
         private Timer _heartBeatTimer;
 
         public void Start(Config config)
-        {
+        {   
             if (config == null)
             {
-                Logger.Log("Config is null");
+                Console.WriteLine("Config is null");
                 return;
             }
 
             _config = config;
+
+            Logger.Init((LogLevel) _config.LogLevel);
 
             InitListening();
 
@@ -82,7 +85,7 @@ namespace MyServerBase
 
             if (ipAddress == null)
             {
-                Logger.Log("IPAddress is null");
+                Logger.LogError("IPAddress is null");
                 return;
             }
 
@@ -99,11 +102,11 @@ namespace MyServerBase
                 var listenerThread = new Thread(RunListening);
                 listenerThread.Start();
 
-                Logger.Log($"Server started with {ipAddress}:{_config.Port}");
+                Logger.LogInformation($"Server started with {ipAddress}:{_config.Port}");
             }
             catch (Exception e)
             {
-                Logger.Log($"ListenerSocket Error: {e}");
+                Logger.LogError($"ListenerSocket Error: {e}");
             }
         }
 
@@ -122,7 +125,7 @@ namespace MyServerBase
         {
             if (_config.HeartBeatInterval == 0 || _config.HeartBeatTimeout == 0)
             {
-                Logger.Log($"HeartBeat configs are null");
+                Logger.LogError($"HeartBeat configs are null");
                 return;
             }
             _heartBeatTimer = new Timer(OnCheckHeartBeat);
@@ -140,7 +143,7 @@ namespace MyServerBase
                 {
                     if (now - session.HeartBeatTime > timeout)
                     {
-                        Logger.Log($"Start disconnecting session by timeout: {session.SessionId}");
+                        Logger.LogInformation($"Start disconnecting session by timeout: {session.SessionId}");
                         DisconnectSession(session.SessionId, "HeartBeat timeout");
                     }
                 }
@@ -149,7 +152,7 @@ namespace MyServerBase
 
         private void WaitForExit()
         {
-            Logger.Log($"Enter any key to exit");
+            Logger.LogInformation($"Enter any key to exit");
             Console.ReadLine();
 
             Stop();
@@ -179,7 +182,7 @@ namespace MyServerBase
             }
             catch (Exception e)
             {
-                Logger.Log($"AcceptCallback Error: {e}");
+                Logger.LogError($"AcceptCallback Error: {e}");
                 DisconnectSocket(clientSocket);
             }
             
@@ -189,7 +192,7 @@ namespace MyServerBase
             var session = (Session)ar.AsyncState;
             if (session == null)
             {
-                Logger.Log($"Session is null");
+                Logger.LogWarning($"Session is null");
                 return;
             }
 
@@ -211,7 +214,7 @@ namespace MyServerBase
                     }
                     else
                     {
-                        Logger.Log($"OnReceiveFunc is null");
+                        Logger.LogWarning($"OnReceiveFunc is null");
                     }
 
                     session.ClientSocket.BeginReceive(session.Buffer, 0, _config.BufferSize, 0, new AsyncCallback(ReadCallback), session);
@@ -225,7 +228,7 @@ namespace MyServerBase
             }
             catch (Exception e)
             {
-                Logger.Log($"ReadCallback Exception: {e}");
+                Logger.LogError($"ReadCallback Exception: {e}");
                 DisconnectSession(session.SessionId, e.Message);
             }
         }
@@ -240,7 +243,7 @@ namespace MyServerBase
             {
                 if (_sessionMap.TryGetValue(sessionId, out var session))
                 {
-                    Logger.Log($"Disconnect Session: {session.SessionId}");
+                    Logger.LogInformation($"Disconnect Session: {session.SessionId}");
                     DisconnectSocket(session.ClientSocket);
                     
                     ReturnSession(session);
@@ -253,7 +256,7 @@ namespace MyServerBase
                 }
                 else
                 {
-                    Logger.Log($"Disconnect Session not exist: {sessionId}");
+                    Logger.LogWarning($"Disconnect Session not exist: {sessionId}");
                 }
             }
         }
@@ -274,7 +277,7 @@ namespace MyServerBase
             }
             catch (Exception e)
             {
-                Logger.Log($"DisconnectSession Exception: {e}");
+                Logger.LogError($"DisconnectSession Exception: {e}");
             }
         }
 
@@ -291,7 +294,7 @@ namespace MyServerBase
             }
             else
             {
-                Logger.Log($"Send Session not exist: {SessionId}");
+                Logger.LogWarning($"Send Session not exist: {SessionId}");
             }
         }
 
@@ -299,7 +302,7 @@ namespace MyServerBase
         {
             if (clientSocket == null)
             {
-                Logger.Log($"SendSocket clientSocket is null");
+                Logger.LogError($"SendSocket clientSocket is null");
                 return;
             }
 
@@ -314,7 +317,7 @@ namespace MyServerBase
             }
             catch (Exception e)
             {
-                Logger.Log($"SendSocket Exception: {e}");
+                Logger.LogError($"SendSocket Exception: {e}");
                 DisconnectSocket(clientSocket);
             }
         }
@@ -324,18 +327,18 @@ namespace MyServerBase
             var clientSocket = (Socket)ar.AsyncState;
             if (clientSocket == null)
             {
-                Logger.Log($"ClientSocket is null");
+                Logger.LogError($"ClientSocket is null");
                 return;
             }
 
             try
             {
                 var bytesSent = clientSocket.EndSend(ar);
-                Logger.Log($"Sent {bytesSent} bytes to client");
+                Logger.LogDebug($"Sent {bytesSent} bytes to client");
             }
             catch (Exception e)
             {
-                Logger.Log($"SendCallback Exception: {e}");
+                Logger.LogError($"SendCallback Exception: {e}");
                 DisconnectSocket(clientSocket);
             }
         }
