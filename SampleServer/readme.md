@@ -1,7 +1,10 @@
 # SampleServer
-## Executing with docker
+## Run with docker
 ```
-docker build -t SampleServer .
+# Change parent directory for copy dependencies.
+cd ..
 
-docker run SampleServer -p 3000:3000
+docker build -t echo-server -f SampleServer/Dockerfile .
+
+docker run -p 3000:3000 -i echo-server
 ```
