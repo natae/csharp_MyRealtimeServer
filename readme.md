@@ -5,5 +5,5 @@
 - See [MyServerBase](./MyServerBase) readme file.
 
 ## Example
-- Server: See [SampleServer](./SampleServer)
-- Client: See [SampleClient](./SampleClient)
+- Server: [SampleServer](./SampleServer)
+- Client: [SampleClient](./SampleClient)
