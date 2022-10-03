@@ -137,16 +137,19 @@ namespace MyServerBase
             var now = Util.Now;
             var timeout = _config.HeartBeatTimeout * 1000;
 
+            List<Session> timeoutSessionList;
             lock (_sessionLock)
             {
-                foreach (var session in _sessionMap.Values)
-                {
-                    if (now - session.HeartBeatTime > timeout)
-                    {
-                        Logger.LogInformation($"Start disconnecting session by timeout: {session.SessionId}");
-                        DisconnectSession(session.SessionId, "HeartBeat timeout");
-                    }
-                }
+                timeoutSessionList = (from session 
+                           in _sessionMap.Values 
+                           where now - session.HeartBeatTime > timeout 
+                           select session).ToList();   
+            }
+
+            foreach (var session in timeoutSessionList)
+            {
+                Logger.LogInformation($"Start disconnecting session by timeout: {session.SessionId}");
+                DisconnectSession(session.SessionId, "HeartBeat timeout");
             }
         }
 
